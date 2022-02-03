@@ -16,7 +16,7 @@ from scipy.spatial import Delaunay
 import pyvista as pv
 
 
-def alpha_shape_3D(pos, alpha):
+def alpha_shape_3D(pos, alpha=10):
     """
     Compute concave hull of a set of 3D points.
     Parameters:
@@ -62,10 +62,7 @@ def alpha_shape_3D(pos, alpha):
     Vertices = np.unique(Edges)
     return Vertices,Edges,Triangles
 
-def random_pointcloud_sphere():
-    N = 600
-    dim = 3
-
+def random_pointcloud_sphere(N=600, dim = 3):
     norm = np.random.normal
     normal_deviates = norm(size=(dim, N))
 
@@ -106,16 +103,18 @@ def random_sphere_mesh_3Dplot():
     plotter.add_mesh(mesh, reset_camera=True)
     plotter.show()
 
-def make_orientation(triangles):
+def orient_complex(triangles):
     '''TODO'''
-    hl = HodgeLaplacians(triangles)
-    L = hl.getHodgeLaplacian(2)
-    faces = hl.n_faces(2)
 
 def orient(L):
-    M = L==1
-    L = L - 2*M
-    return L
+    '''Hack, replace with orient_complex'''
+    L = np.array(L)
+    M = np.array(L>10e-15)
+    E = np.bool_(np.eye(M.shape[0]))
+    E = np.invert(E)
+    MM = M*E
+    LL = L - 2*L*MM
+    return LL
 
 def laplacian_eigenfunction_3Dplot(pts):
     fig = plt.figure()
@@ -167,7 +166,7 @@ def PointCloudSphereToWeightedComplex(points):
 def SimplicesMeasureDict(simplices, point_coord):
     weighted_simplices = dict()
     for simplex in simplices:
-        if len(simplex) == 1:
+        if len(simplex) == np.float64(1):
             weighted_simplices[simplex] = 1
         else:
             simplex_points = point_coord[list(simplex),:]
@@ -200,3 +199,12 @@ def MakeComplex(simplices):
             for face in combinations(simplex, r):
                     faceset.add(tuple(face))
     return tuple(sorted(faceset))
+
+""" def DualComplex(simplices, point_coordinates):
+    barycentre_coords = np.zeros((len(simplices),3))
+    for simplex,i in zip(simplices,range(len(simplices))):
+        barycentre = np.mean(point_coordinates[simplex], axis=0)
+        barycentre_coords[i,:] = barycentre
+    
+
+    return dual_simplices, barycentre_coords """
