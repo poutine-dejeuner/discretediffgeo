@@ -5,7 +5,7 @@ import matplotlib
 from matplotlib.collections import PatchCollection, LineCollection
 import pyvista as pv
 
-from discretediffgeo import *
+from discretediffgeo.utils import *
 
 pts = np.array([[1,0,0],[0,1,0],[0,0,1]])
 assert abs(SimplexMeasure(pts))==sqrt(3)/2
